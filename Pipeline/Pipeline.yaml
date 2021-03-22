@@ -1,0 +1,48 @@
+# -----------------------------------------------------------------------------
+# .SYNOPSIS
+#   This pipeline is the main pipeline that contains the top level stages for the deployment
+# using other YAML templates as references both locally and from the common library
+# .DESCRIPTION
+#   This pipeline will:
+#  1. Add the common-library for shared pipeline references, which include
+#     a. YAML references for Image Builder to deploy custom images and / or containers
+#     b. YAML references for Terraform Init, Plan, and Apply, which contain references to common bash scripts
+
+# .ASSUMPTIONS:
+#     1. Looping is not needed for environment stages due to different parameters per environment
+#     2. Terraform steps are the same across all projects (setup, init, plan, apply)
+
+# .NOTES
+#     File Name      : Pipeline.yaml
+#     Prerequisite   : ADO Multi-Stage Yaml Pipeline
+
+# -----------------------------------------------------------------------------
+
+name: AKS-Deploy-$(version).$(Rev:rr)
+
+#release wide variables
+variables:
+  - name: version
+    value: 0.5
+
+
+  - name: system.debug 
+    value: true
+
+
+
+
+#comment out line 53-59 if not planning to use image builder resource
+ 
+
+pool:
+  vmImage: 'Ubuntu-18.04'
+
+stages:
+- stage: Dev
+  displayName: Dev
+  jobs:
+  - template: Stage.yaml
+    parameters:
+      environment: dev
+      serviceConnectionApp: ARM

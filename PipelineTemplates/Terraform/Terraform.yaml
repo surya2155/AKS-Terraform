@@ -1,0 +1,51 @@
+parameters:
+  serviceConnectionApp:
+  environment:
+
+steps:
+
+  - script: |
+        
+        pwd
+        ls -lrt $(Build.SourcesDirectory)
+        ls -lrt $(Build.SourcesDirectory)
+        terraform -version
+
+  - task: TerraformInstaller@0
+    displayName: 'install'
+    inputs:
+      terraformVersion: '0.14.4'
+
+#  - task: AzureCLI@2
+#    displayName: Terraform Backend Setup
+#    inputs:
+#      azureSubscription: ${{ parameters.serviceConnectionApp }}
+#      addSpnToEnvironment: true
+#      scriptType: bash
+#      scriptPath: PipelineTemplates/Terraform/TerraformSetup.sh
+#      arguments: $(Build.SourcesDirectory) ${{ parameters.environment }} ${{ parameters.serviceConnectionApp }}
+  - task: AzureCLI@2
+    displayName: Terraform Init
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnectionApp }}
+      addSpnToEnvironment: true
+      scriptType: bash
+      scriptPath: PipelineTemplates/Terraform/TerraformInit.sh
+      arguments: $(Build.SourcesDirectory) ${{ parameters.environment }}
+  - task: AzureCLI@2
+    displayName: Terraform Plan
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnectionApp }}
+      addSpnToEnvironment: true
+      scriptType: bash
+      scriptPath: PipelineTemplates/Terraform/TerraformPlan.sh
+      arguments: $(Build.SourcesDirectory) ${{ parameters.environment }}
+  - task: AzureCLI@2
+    displayName: Terraform Apply
+    condition: ne(variables['Build.Reason'], 'PullRequest')
+    inputs:
+      azureSubscription: ${{ parameters.serviceConnectionApp }}
+      addSpnToEnvironment: true
+      scriptType: bash
+      scriptPath: PipelineTemplates/Terraform/TerraformApply.sh
+      arguments: $(Build.SourcesDirectory) ${{ parameters.environment }}
